@@ -5,6 +5,10 @@ public with sharing class DataFactory {
         return new Account(Name = accountName);
     }
 
+    public static Contact createContact(String lastName, Id accountId){
+        return new Contact(LastName = lastName, AccountId = accountId);
+    }
+
     public static Product2 createProduct(String productName) {
         
         return new Product2(Name= productName, IsActive = true);
@@ -67,9 +71,11 @@ public with sharing class DataFactory {
         return orderItems;
     }
     
-    public static List<Order> createOrdersFulljob(String accountName, String productName, Double unitPrice, Integer numberOfOrders, Integer quantityProduct){
+    public static List<Order> createOrdersFulljob(String accountName, String contactLastName, String productName, Double unitPrice, Integer numberOfOrders, Integer quantityProduct){
         Account account =  DataFactory.createAccount(accountName);
         insert account;
+        Contact contact = DataFactory.createContact(contactLastName, account.Id);
+        insert contact;
         Product2 product = DataFactory.createProduct(productName);
         insert product;
         PricebookEntry pricebookEntry = DataFactory.createPricebookEntry(product.id, unitPrice);

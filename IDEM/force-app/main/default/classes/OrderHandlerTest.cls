@@ -2,8 +2,8 @@
 public with sharing class OrderHandlerTest {
     @TestSetup
     static void makeData(){
-        DataFactory.createOrdersFulljob('AccountName1', 'ProductName1', 100, 1, 1);
-        DataFactory.createOrdersFulljob('AccountName2', 'ProductName2', 100, 1, 0);
+        DataFactory.createOrdersFulljob('AccountName1', 'ContactName1', 'ProductName1', 100, 1, 1);
+        DataFactory.createOrdersFulljob('AccountName2', 'ContactName2', 'ProductName2', 100, 1, 0);
         
         
     }

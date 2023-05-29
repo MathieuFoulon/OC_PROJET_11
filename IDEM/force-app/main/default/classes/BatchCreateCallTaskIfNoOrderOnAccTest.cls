@@ -45,7 +45,7 @@ public with sharing class BatchCreateCallTaskIfNoOrderOnAccTest {
         Id batchId = Database.executeBatch(batch);
         Test.stopTest();
         List<Task> tasksFromAccounts = [SELECT Id, Subject FROM Task WHERE WhatId IN :accounts];
-        System.assertEquals(1, tasksFromAccounts.size());
+        Assert.areEqual(1, tasksFromAccounts.size());
     }
 
     @isTest
@@ -59,6 +59,6 @@ public with sharing class BatchCreateCallTaskIfNoOrderOnAccTest {
         Test.stopTest();
         List<Task> tasksFromAccounts = [SELECT Id, Subject FROM Task WHERE WhatId IN :accounts];
         // we still have here the 'AccountName1', so 1 + 101 created for loop
-        System.assertEquals(102, tasksFromAccounts.size());
+        Assert.areEqual(102, tasksFromAccounts.size());
     }
 }

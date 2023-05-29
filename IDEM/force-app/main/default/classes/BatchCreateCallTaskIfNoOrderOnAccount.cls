@@ -3,27 +3,23 @@ global with sharing class BatchCreateCallTaskIfNoOrderOnAccount implements Datab
     public Integer recordsProcessed = 0;
     
     global Database.QueryLocator start(Database.BatchableContext bc){ 
-
-        List<Id> idOfAccountsWithCallsTasks = new List<Id>();
-        List<Task> tasksWithCalls = [SELECT WhatId FROM Task WHERE What.type = 'Account' AND Type = 'Call'];
-        for(Task taskWithCall : tasksWithCalls){
-            idOfAccountsWithCallsTasks.add(taskWithCall.WhatId);
-        }
-
-
-        return Database.getQueryLocator([SELECT Id, Name, OwnerId FROM Account 
-        WHERE Id NOT IN (SELECT AccountId FROM Order) 
-        AND Id NOT IN :idOfAccountsWithCallsTasks]);
+        return Database.getQueryLocator([SELECT Id, OwnerId, 
+            (SELECT Id FROM Orders), 
+            (SELECT Id FROM Tasks WHERE Subject='Call') 
+            FROM Account 
+            WHERE Active__c = false
+        ]);
  
     }
      
     global void execute(Database.BatchableContext bc, List<Account> scope){    
         
-        List<Task> tasks = new List<Task>();
+        List<Task> tasksList = new List<Task>();
 
         for(Account account : scope){
             Contact contact = [SELECT Id, LastName FROM Contact WHERE AccountId = :account.id LIMIT 1];
-            Task task = new Task(
+            if(account.Orders.size() == 0 && account.Tasks.size() == 0){
+                Task task = new Task(
                 WhatId = account.Id,
                 OwnerId = account.OwnerId,
                 WhoId = contact.Id,
@@ -33,12 +29,14 @@ global with sharing class BatchCreateCallTaskIfNoOrderOnAccount implements Datab
                 Status = 'Not Started',
                 Priority = 'Normal'
                 );
-            tasks.add(task);
+            tasksList.add(task);
             recordsProcessed = recordsProcessed + 1;
+            }
+            
         }
 
-        if(tasks.size() > 0){
-            insert tasks;
+        if(tasksList.size() > 0){
+            insert tasksList;
         }
     }    
      

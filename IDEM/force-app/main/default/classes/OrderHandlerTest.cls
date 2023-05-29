@@ -29,7 +29,7 @@ public with sharing class OrderHandlerTest {
             WHERE Status = 'Activated'
         ];
 
-        System.assertEquals(1, changedOrders.size());
+        Assert.areEqual(1, changedOrders.size());
     }
 
     @isTest
@@ -56,7 +56,7 @@ public with sharing class OrderHandlerTest {
         LIMIT 1
         ];
 
-        System.assertEquals('Draft', notActivatedOrder.status);
+        Assert.areEqual('Draft', notActivatedOrder.status);
     }
 
     @isTest
@@ -64,7 +64,7 @@ public with sharing class OrderHandlerTest {
         Account account = DataFactory.createAccount('AccountName3');
         insert account;
         // account created, default value for Active__c is false
-        System.assertEquals(false, account.Active__c);
+        Assert.areEqual(false, account.Active__c);
     }
 
     @isTest
@@ -84,7 +84,7 @@ public with sharing class OrderHandlerTest {
 
         
         System.debug(account);
-        System.assertEquals(true, targetedAccount.Active__c);
+        Assert.areEqual(true, targetedAccount.Active__c);
         
 
     }
@@ -106,7 +106,7 @@ public with sharing class OrderHandlerTest {
             LIMIT 1
         ];
         
-        System.assertEquals(false, targetedAccount.Active__c);
+        Assert.areEqual(false, targetedAccount.Active__c);
 
 
     }

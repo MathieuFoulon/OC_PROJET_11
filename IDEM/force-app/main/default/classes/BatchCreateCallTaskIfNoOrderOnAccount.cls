@@ -3,41 +3,45 @@ global with sharing class BatchCreateCallTaskIfNoOrderOnAccount implements Datab
     public Integer recordsProcessed = 0;
     
     global Database.QueryLocator start(Database.BatchableContext bc){ 
-        return Database.getQueryLocator([SELECT Id, OwnerId, 
-            (SELECT Id FROM Orders), 
-            (SELECT Id FROM Tasks WHERE Subject='Call') 
+       
+        return Database.getQueryLocator([SELECT Id, OwnerId 
             FROM Account 
-            WHERE Active__c = false
-        ]);
+            WHERE Active__c = false]);
  
     }
      
     global void execute(Database.BatchableContext bc, List<Account> scope){    
-        
-        List<Task> tasksList = new List<Task>();
 
+
+        List<Task> tasksList = new List<Task>();
+        Set<Id> AccountIdSet = (new Map<Id,SObject>(scope)).keySet();
+        Map<Id, Order> mapAccountIdToOrder = AccountManager.getAccountIdToOrderMap(AccountIdSet);
+        Map<Id, Task> mapAccountIdToTask = AccountManager.getAccountIdToTaskMap(AccountIdSet);
+      
         for(Account account : scope){
-            Contact contact = [SELECT Id, LastName FROM Contact WHERE AccountId = :account.id LIMIT 1];
-            if(account.Orders.size() == 0 && account.Tasks.size() == 0){
+            Contact contact = [SELECT Id, LastName FROM Contact WHERE AccountId = :account.Id LIMIT 1];
+            if(mapAccountIdToOrder.get(account.Id) == null && mapAccountIdToTask.get(account.Id) == null){
+                System.debug('inside if');
                 Task task = new Task(
-                WhatId = account.Id,
-                OwnerId = account.OwnerId,
-                WhoId = contact.Id,
-                Subject = 'Call',
-                ReminderDateTime = Date.today().addDays(5),
-                IsReminderSet = true,
-                Status = 'Not Started',
-                Priority = 'Normal'
+                    WhatId = account.Id,
+                    OwnerId = account.OwnerId,
+                    WhoId = contact.Id,
+                    Subject = 'Call',
+                    ReminderDateTime = Date.today().addDays(5),
+                    IsReminderSet = true,
+                    Status = 'Not Started',
+                    Priority = 'Normal'
                 );
-            tasksList.add(task);
-            recordsProcessed = recordsProcessed + 1;
+                tasksList.add(task);
+                recordsProcessed = recordsProcessed + 1;
             }
-            
+
         }
 
         if(tasksList.size() > 0){
             insert tasksList;
         }
+
     }    
      
     global void finish(Database.BatchableContext bc){     
@@ -48,4 +52,5 @@ global with sharing class BatchCreateCallTaskIfNoOrderOnAccount implements Datab
         BatchCreateCallTaskIfNoOrderOnAccount batch = new BatchCreateCallTaskIfNoOrderOnAccount();
         Database.executeBatch(batch);
     }
-}
+
+} 

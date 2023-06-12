@@ -1,4 +1,10 @@
-trigger OrderTrigger on Order (after insert, before update, after delete) {
+/**
+ * @description       : Trigger fired on Order when : before update, after insert, after delete
+ * @author            : Mathieu Foulon
+ * @last modified on  : 12-06-2023
+ * @last modified by  : Mathieu Foulon
+**/
+trigger OrderTrigger on Order (before update, after insert, after delete) {
 
     if(Trigger.isBefore){
         if(Trigger.isUpdate){

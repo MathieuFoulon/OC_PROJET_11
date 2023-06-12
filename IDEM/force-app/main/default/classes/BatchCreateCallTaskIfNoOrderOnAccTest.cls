@@ -1,3 +1,10 @@
+/**
+ * @description       : Test class for BatchCreateCallTaskIfNoOrderOnAccount
+ * @author            : Mathieu Foulon
+ * @group             : 
+ * @last modified on  : 12-06-2023
+ * @last modified by  : Mathieu Foulon
+**/
 @isTest
 public with sharing class BatchCreateCallTaskIfNoOrderOnAccTest {
     @TestSetup
@@ -35,30 +42,38 @@ public with sharing class BatchCreateCallTaskIfNoOrderOnAccTest {
 
     }
 
+    /**
+    * @description Testing that 1 task is created
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @isTest
     static void BatchCreateTaskToAccountNoOrderTest(){
         // one account with order, one account without order
-        List<Account> accounts = [SELECT Id, Name FROM Account WHERE Name LIKE 'AccountName%'];
+        List<Account> accountsList = [SELECT Id, Name FROM Account WHERE Name LIKE 'AccountName%'];
 
         Test.startTest();
         BatchCreateCallTaskIfNoOrderOnAccount batch = new BatchCreateCallTaskIfNoOrderOnAccount();
         Id batchId = Database.executeBatch(batch);
         Test.stopTest();
-        List<Task> tasksFromAccounts = [SELECT Id, Subject FROM Task WHERE WhatId IN :accounts];
-        Assert.areEqual(1, tasksFromAccounts.size());
+        List<Task> tasksFromAccountsList = [SELECT Id, Subject FROM Task WHERE WhatId IN :accountsList];
+        Assert.areEqual(1, tasksFromAccountsList.size());
     }
 
+    /**
+    * @description Testing that 102 tasks are created
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @isTest
     static void BatchCreateTaskToAccountsNoOrderTest(){
         // one account with order, 102 account without order
-        List<Account> accounts = [SELECT Id, Name FROM Account WHERE Name LIKE 'Account%'];
+        List<Account> accountsList = [SELECT Id, Name FROM Account WHERE Name LIKE 'Account%'];
 
         Test.startTest();
         BatchCreateCallTaskIfNoOrderOnAccount batch = new BatchCreateCallTaskIfNoOrderOnAccount();
         Id batchId = Database.executeBatch(batch);
         Test.stopTest();
-        List<Task> tasksFromAccounts = [SELECT Id, Subject FROM Task WHERE WhatId IN :accounts];
+        List<Task> tasksFromAccountsList = [SELECT Id, Subject FROM Task WHERE WhatId IN :accountsList];
         // we still have here the 'AccountName1', so 1 + 101 created for loop
-        Assert.areEqual(102, tasksFromAccounts.size());
+        Assert.areEqual(102, tasksFromAccountsList.size());
     }
 }

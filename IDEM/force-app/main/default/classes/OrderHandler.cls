@@ -1,8 +1,19 @@
+/**
+ * @description       : Class supporting OrderTrigger job processes
+ * @author            : Mathieu Foulon
+ * @last modified on  : 12-06-2023
+ * @last modified by  : Mathieu Foulon
+**/
 public with sharing class OrderHandler {
 
-    //Well, this is a native funtionnality of Salesforce, but we can reproduce it and change the message as follow
-    public static void checkIfProducts(List<Order> orders) {
-        for(Order order : orders){
+    
+    /**
+    * @description  Well, this is a native funtionnality of Salesforce, but we can reproduce it and change the message
+    * @author Mathieu Foulon | 11-06-2023 
+    * @param List<Order> ordersList 
+    **/
+    public static void checkIfProducts(List<Order> ordersList) {
+        for(Order order : ordersList){
             // Products_purchased__c = roll up summary SUM of quantity of Order Product
             if(order.status == 'Activated' && order.Products_purchased__c == 0) {
                 
@@ -11,42 +22,54 @@ public with sharing class OrderHandler {
         }
     }
 
-    // checks that Active__c == true if order related to account, if not assigns true
-    public static void checkIfActiveInAccount(List<Order> orders){
+    
+    /**
+    * @description  checks that Active__c == true if order related to account, if not assigns true
+    * @author Mathieu Foulon | 11-06-2023 
+    * @param List<Order> ordersList 
+    **/
+    public static void checkIfActiveInAccount(List<Order> ordersList){
         List<Id> accountsIds = new List<Id>();
-        for(Order order : orders){
+        for(Order order : ordersList){
             accountsIds.add(order.AccountId);
         }
 
-        List<Account> accounts = [SELECT Id, Active__c, (SELECT Id, AccountId FROM Orders) 
+        // targets accounts with at least one order
+        List<Account> accountsList = [SELECT Id, Active__c, (SELECT Id, AccountId FROM Orders) 
             FROM Account
             WHERE Id IN :accountsIds];
         
-        for(Account account : accounts){
+        for(Account account : accountsList){
             if(account.Active__c == false){
                 account.Active__c = true;
             }
         }
 
-        update accounts;
+        update accountsList;
     }
 
-    // checks if at least one order is related to account, if not : Active__c = false
-    public static void checkIfStillOrderInAccount(List<Order> orders){
-        List<Id> accountsIds = new List<Id>();
-        for(Order order : orders){
-            accountsIds.add(order.AccountId);
+    
+    /**
+    * @description  checks if at least one order is related to account, if none : set Active__c to false
+    * @author Mathieu Foulon | 11-06-2023 
+    * @param List<Order> ordersList 
+    **/
+    public static void checkIfStillOrderInAccount(List<Order> ordersList){
+        List<Id> accountsIdsList = new List<Id>();
+        for(Order order : ordersList){
+            accountsIdsList.add(order.AccountId);
         }
 
-        List<Account> accounts = [SELECT Id, Active__c 
+        // targets accounts with no orders
+        List<Account> accountsList = [SELECT Id, Active__c 
             FROM Account 
-            WHERE Id IN :accountsIds
+            WHERE Id IN :accountsIdsList
             AND Id NOT IN (SELECT AccountId FROM Order)];
 
-        for(Account account : accounts){
+        for(Account account : accountsList){
             account.Active__c = false;
         }
 
-        update accounts;
+        update accountsList;
     }
 }

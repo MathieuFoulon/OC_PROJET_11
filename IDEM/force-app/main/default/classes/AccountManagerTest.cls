@@ -1,3 +1,9 @@
+/**
+ * @description       : Test Classe for AccountManager
+ * @author            : Mathieu Foulon
+ * @last modified on  : 12-06-2023
+ * @last modified by  : Mathieu Foulon
+**/
 @isTest
 public with sharing class AccountManagerTest {
     @TestSetup
@@ -31,34 +37,42 @@ public with sharing class AccountManagerTest {
 
     }
 
+    /**
+    * @description Testing wit no order
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @IsTest
     static void getAccountIdToOrderMapNoOrderTest(){
-        List<Account> accounts =[SELECT Id
+        List<Account> accountsList =[SELECT Id
             FROM Account 
             WHERE Name = 'AccountTest1000'
         ];
-        Set<Id> AccountIdSet = (new Map<Id,SObject>(accounts)).keySet();
+        Set<Id> AccountIdSet = (new Map<Id,SObject>(accountsList)).keySet();
         Test.startTest();
         Map<Id, Order> mapAccountIdToOrder = AccountManager.getAccountIdToOrderMap(AccountIdSet);
         Test.stopTest();
-        for(Account account : accounts){
+        for(Account account : accountsList){
             Assert.areEqual(null, mapAccountIdToOrder.get(account.Id));
         }
         Assert.areEqual(0, mapAccountIdToOrder.size());
         
     }
 
+    /**
+    * @description Testing with orders
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @isTest
     static void getAccountIdToOrderMapWithOrderTest(){
-        List<Account> accounts =[SELECT Id, OwnerId
+        List<Account> accountsList =[SELECT Id, OwnerId
             FROM Account 
             WHERE Name = 'AccountTest2000'
         ];
-        Set<Id> AccountIdSet = (new Map<Id,SObject>(accounts)).keySet();
+        Set<Id> AccountIdSet = (new Map<Id,SObject>(accountsList)).keySet();
         Test.startTest();
         Map<Id, Order> mapAccountIdToOrder = AccountManager.getAccountIdToOrderMap(AccountIdSet);
         Test.stopTest();
-        for(Account account : accounts){
+        for(Account account : accountsList){
             Order order = [SELECT Id, Name, AccountId FROM Order WHERE AccountId = :account.id];
             Assert.areEqual(order, mapAccountIdToOrder.get(account.Id));
         }
@@ -66,37 +80,45 @@ public with sharing class AccountManagerTest {
         
     }
 
+    /**
+    * @description Testing without task
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @IsTest
     static void getAccountIdToTaskMapNoTaskTest(){
-        List<Account> accounts =[SELECT Id
+        List<Account> accountsList =[SELECT Id
             FROM Account 
             WHERE Name = 'AccountTest1000'
         ];
-        Set<Id> AccountIdSet = (new Map<Id,SObject>(accounts)).keySet();
+        Set<Id> AccountIdSet = (new Map<Id,SObject>(accountsList)).keySet();
         Test.startTest();
         Map<Id, Task> mapAccountIdToTask = AccountManager.getAccountIdToTaskMap(AccountIdSet);
         Test.stopTest();
-        for(Account account : accounts){
+        for(Account account : accountsList){
             Assert.areEqual(null, mapAccountIdToTask.get(account.Id));
         }
         Assert.areEqual(0, mapAccountIdToTask.size());
         
     }
 
+    /**
+    * @description testing with tasks
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @IsTest
     static void getAccountIdToTaskMapWithTaskTest(){
-        List<Account> accounts =[SELECT Id, OwnerId
+        List<Account> accountsList =[SELECT Id, OwnerId
             FROM Account 
             WHERE Name = 'AccountTest2000'
         ];
         
 
-        Set<Id> AccountIdSet = (new Map<Id,SObject>(accounts)).keySet();
+        Set<Id> AccountIdSet = (new Map<Id,SObject>(accountsList)).keySet();
 
         Test.startTest();
         Map<Id, Task> mapAccountIdToTask = AccountManager.getAccountIdToTaskMap(AccountIdSet);
         Test.stopTest();
-        for(Account account : accounts){
+        for(Account account : accountsList){
             Task task = [SELECT Id, WhatId FROM Task WHERE WhatId = :account.id];
             Assert.areEqual(task, mapAccountIdToTask.get(account.Id));
         }

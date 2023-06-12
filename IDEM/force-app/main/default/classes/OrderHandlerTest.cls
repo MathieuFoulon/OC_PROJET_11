@@ -1,3 +1,6 @@
+/**
+ * @description       : This class is built to test OrderHandler methods
+**/
 @isTest
 public with sharing class OrderHandlerTest {
     @TestSetup
@@ -7,9 +10,14 @@ public with sharing class OrderHandlerTest {
         
         
     }
+    
+    /**
+    * @description Test on update : order status changed
+    * @author Mathieu Foulon | 09-06-2023 
+    **/
     @isTest
     static void checkIfProductsWithOneProductTest(){
-        List<Order> orders = [SELECT Id, Name FROM Order 
+        List<Order> ordersList = [SELECT Id, Name FROM Order 
             WHERE Products_purchased__c = 1
         ];
 
@@ -17,7 +25,7 @@ public with sharing class OrderHandlerTest {
 
         Test.startTest();
 
-        for(Order order : orders){
+        for(Order order : ordersList){
             order.Status = 'Activated';
             activatedOrders.add(order);
         }
@@ -25,13 +33,17 @@ public with sharing class OrderHandlerTest {
 
         Test.stopTest();
 
-        List<Order> changedOrders = [SELECT Id, Name FROM Order 
+        List<Order> changedOrdersList = [SELECT Id, Name FROM Order 
             WHERE Status = 'Activated'
         ];
 
-        Assert.areEqual(1, changedOrders.size());
+        Assert.areEqual(1, changedOrdersList.size());
     }
 
+    /**
+    * @description Test on update : order status not changed
+    * @author Mathieu Foulon | 09-06-2023 
+    **/
     @isTest
     static void checkIfProductsWithoutProductTest(){
         Order order = [SELECT Id, Name FROM Order 
@@ -59,6 +71,10 @@ public with sharing class OrderHandlerTest {
         Assert.areEqual('Draft', notActivatedOrder.status);
     }
 
+    /**
+    * @description Test on create : good status assigned on account
+    * @author Mathieu Foulon | 09-06-2023 
+    **/
     @isTest
     static void checkIfNotActiveWhenAccountIsCreatedTest(){
         Account account = DataFactory.createAccount('AccountName3');
@@ -67,6 +83,10 @@ public with sharing class OrderHandlerTest {
         Assert.areEqual(false, account.Active__c);
     }
 
+    /**
+    * @description Test good status on account is assigned when Order is created
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @isTest
     static void checkIfActiveInAccountWhenOrderIsCreatedTest(){
         Account account = DataFactory.createAccount('AccountName3');
@@ -89,6 +109,10 @@ public with sharing class OrderHandlerTest {
 
     }
 
+    /**
+    * @description Test good status is assigned to account if no orders left
+    * @author Mathieu Foulon | 11-06-2023 
+    **/
     @isTest 
     static void checkIfNotActiveOnAccountWhenAllOrdersDeleted(){
         Account account = DataFactory.createAccount('AccountName3');
@@ -96,10 +120,10 @@ public with sharing class OrderHandlerTest {
 
         Contract contract = DataFactory.createContract(account.id);
         insert contract;
-        List<Order> orders = DataFactory.createOrders(account.id, 2);
-        insert orders;
+        List<Order> ordersList = DataFactory.createOrders(account.id, 2);
+        insert ordersList;
 
-        delete orders;
+        delete ordersList;
 
         Account targetedAccount = [SELECT Id, Name, Active__c FROM Account
             WHERE Name = 'AccountName3'
